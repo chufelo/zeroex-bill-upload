@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ZeroEx Bill Upload</title>
+</head>
+<body>
+<h2>Bill Upload</h2>
+
+<form id="billForm">
+    <!-- We'll auto-fill location ID from URL param -->
+    <input type="hidden" name="location_id" id="location_id">
+    
+    Truck ID (optional):<br>
+    <input type="text" name="truck_id"><br><br>
+
+    Bill ID (optional):<br>
+    <input type="text" name="bill_id"><br><br>
+
+    Bill Photo:<br>
+    <input type="file" name="file" accept="image/*" required><br><br>
+    
+    <button type="submit">Upload</button>
+</form>
+
+<script>
+// 1) Extract location_id from URL param, e.g. ?location_id=12345
+const urlParams = new URLSearchParams(window.location.search);
+document.getElementById('location_id').value = urlParams.get('location_id') || "";
+
+// 2) On form submit, we POST to the Azure Function endpoint
+document.getElementById('billForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+
+    // The Azure Function in Static Web Apps is accessible via "/api/<FunctionName>"
+    // Our function is named "UploadBill" (from the folder name).
+    const res = await fetch('/api/UploadBill', {
+        method: 'POST',
+        body: formData
+    });
+
+    const text = await res.text();
+    alert(text);
+};
+</script>
+
+</body>
+</html>
