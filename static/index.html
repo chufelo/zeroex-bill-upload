@@ -163,6 +163,27 @@
             display: none;
         }
 
+        .photo-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .photo-option {
+            padding: 8px 12px;
+            background-color: #f5f5f5;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .photo-option:hover {
+            background-color: #e5e5e5;
+        }
+
         .button {
             display: block;
             width: 100%;
@@ -203,6 +224,15 @@
         .status-error {
             background-color: rgba(232, 17, 35, 0.1);
             color: #e81123;
+        }
+
+        .debug-info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            display: none;
         }
 
         .loading {
@@ -322,10 +352,17 @@
                                 <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
                             </svg>
                         </div>
-                        <p id="uploadText">Click to select or drag and drop a photo</p>
-                        <!-- Safari on iOS requires direct touch handling -->
-                        <input type="file" name="file" id="fileInput" accept="image/*" capture="environment" required>
+                        <p id="uploadText">Click to select a photo</p>
+                        
+                        <!-- Removed capture attribute to allow choosing from library -->
+                        <input type="file" name="file" id="fileInput" accept="image/*" required>
                     </div>
+                    
+                    <div class="photo-options">
+                        <div class="photo-option" id="takePictureBtn">Take Picture</div>
+                        <div class="photo-option" id="choosePictureBtn">Choose from Library</div>
+                    </div>
+                    
                     <div class="file-preview-container">
                         <img id="imagePreview" class="file-preview" alt="Preview">
                         <div id="fileName" class="file-name"></div>
@@ -336,6 +373,7 @@
             </form>
 
             <div id="uploadStatus"></div>
+            <div id="debugInfo" class="debug-info"></div>
         </div>
     </div>
 
@@ -351,6 +389,23 @@
         const uploadStatus = document.getElementById('uploadStatus');
         const form = document.getElementById('billForm');
         const dropArea = document.getElementById('dropArea');
+        const takePictureBtn = document.getElementById('takePictureBtn');
+        const choosePictureBtn = document.getElementById('choosePictureBtn');
+        const debugInfo = document.getElementById('debugInfo');
+        
+        // For debugging
+        const showDebug = false; // Set to true to show debug information
+        
+        function logDebug(message) {
+            if (showDebug) {
+                if (typeof message === 'object') {
+                    debugInfo.innerHTML += (JSON.stringify(message) + '<br>');
+                } else {
+                    debugInfo.innerHTML += (message + '<br>');
+                }
+                debugInfo.style.display = 'block';
+            }
+        }
 
         // Extract location_id from URL param
         const urlParams = new URLSearchParams(window.location.search);
@@ -365,12 +420,70 @@
             document.getElementById('locationBadge').style.backgroundColor = '#ffecec';
         }
 
-        // Handle file selection with iOS compatibility fixes
+        // Handle file selection with improved error handling
         fileInput.addEventListener('change', function(event) {
-            event.preventDefault(); // Prevent default browser behavior
-            event.stopPropagation();
-            
-            handleFileSelection(this);
+            try {
+                logDebug('File input change event triggered');
+                handleFileSelection(this);
+            } catch (error) {
+                logDebug('Error in file input change: ' + error.message);
+                showStatus('Error selecting file: ' + error.message, 'error');
+            }
+        });
+
+        // Take picture button - uses camera
+        takePictureBtn.addEventListener('click', function() {
+            try {
+                // Create a temporary input with camera capture
+                const tempInput = document.createElement('input');
+                tempInput.type = 'file';
+                tempInput.accept = 'image/*';
+                tempInput.capture = 'environment'; // Use the camera
+                
+                tempInput.addEventListener('change', function() {
+                    if (this.files && this.files.length > 0) {
+                        // Copy the file to our main input
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(this.files[0]);
+                        fileInput.files = dataTransfer.files;
+                        
+                        // Process the file
+                        handleFileSelection(fileInput);
+                    }
+                });
+                
+                tempInput.click();
+            } catch (error) {
+                logDebug('Error taking picture: ' + error.message);
+                showStatus('Error accessing camera: ' + error.message, 'error');
+            }
+        });
+
+        // Choose from library button
+        choosePictureBtn.addEventListener('click', function() {
+            try {
+                // Create a temporary input without capture attribute
+                const tempInput = document.createElement('input');
+                tempInput.type = 'file';
+                tempInput.accept = 'image/*';
+                
+                tempInput.addEventListener('change', function() {
+                    if (this.files && this.files.length > 0) {
+                        // Copy the file to our main input
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(this.files[0]);
+                        fileInput.files = dataTransfer.files;
+                        
+                        // Process the file
+                        handleFileSelection(fileInput);
+                    }
+                });
+                
+                tempInput.click();
+            } catch (error) {
+                logDebug('Error choosing from library: ' + error.message);
+                showStatus('Error selecting file: ' + error.message, 'error');
+            }
         });
 
         // Tap on the entire drop area should trigger file input
@@ -378,31 +491,47 @@
             // Only trigger if the click wasn't on the input itself
             if (event.target !== fileInput) {
                 event.preventDefault();
-                fileInput.click();
+                choosePictureBtn.click(); // Default to choosing from library
             }
         });
 
         function handleFileSelection(input) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                
-                // Show file name
-                fileName.textContent = file.name;
-                fileName.style.display = 'block';
-                
-                // Change upload text
-                uploadText.textContent = 'Photo selected';
-                
-                // Enable submit button immediately
-                submitButton.disabled = false;
-                
-                // Show image preview
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imagePreview.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
+            try {
+                logDebug('Handling file selection');
+                if (input.files && input.files[0]) {
+                    const file = input.files[0];
+                    logDebug('File selected: ' + file.name + ' (' + file.type + ')');
+                    
+                    // Show file name
+                    fileName.textContent = file.name;
+                    fileName.style.display = 'block';
+                    
+                    // Change upload text
+                    uploadText.textContent = 'Photo selected';
+                    
+                    // Enable submit button immediately
+                    submitButton.disabled = false;
+                    
+                    // Show image preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        logDebug('FileReader loaded');
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    
+                    reader.onerror = function(e) {
+                        logDebug('FileReader error: ' + e.target.error);
+                        showStatus('Error reading file: ' + e.target.error, 'error');
+                    };
+                    
+                    reader.readAsDataURL(file);
+                } else {
+                    logDebug('No file selected or files array is empty');
+                }
+            } catch (error) {
+                logDebug('Error in handleFileSelection: ' + error.message);
+                showStatus('Error processing file: ' + error.message, 'error');
             }
         }
 
@@ -429,14 +558,23 @@
         });
 
         dropArea.addEventListener('drop', function(e) {
-            const dt = e.dataTransfer;
-            if (dt.files && dt.files.length) {
-                fileInput.files = dt.files;
-                handleFileSelection(fileInput);
+            try {
+                const dt = e.dataTransfer;
+                if (dt.files && dt.files.length) {
+                    // Create a proper FileList
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(dt.files[0]);
+                    fileInput.files = dataTransfer.files;
+                    
+                    handleFileSelection(fileInput);
+                }
+            } catch (error) {
+                logDebug('Error in drop handler: ' + error.message);
+                showStatus('Error uploading dropped file: ' + error.message, 'error');
             }
         }, false);
 
-        // Form submission
+        // Form submission with improved error handling and timeout
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -449,31 +587,62 @@
             submitButton.innerHTML = '<span class="loading"></span> Uploading...';
             submitButton.disabled = true;
             
-            const formData = new FormData(form);
-            
             try {
-                const response = await fetch('/api/UploadBill', {
-                    method: 'POST',
-                    body: formData
-                });
+                logDebug('Starting form submission');
+                const formData = new FormData(form);
                 
-                const text = await response.text();
+                // Log form data keys
+                const formDataKeys = [];
+                for (const key of formData.keys()) {
+                    formDataKeys.push(key);
+                }
+                logDebug('Form data keys: ' + formDataKeys.join(', '));
                 
-                if (response.ok) {
-                    showStatus(text, 'success');
-                    // Reset form and UI
-                    imagePreview.style.display = 'none';
-                    fileName.style.display = 'none';
-                    uploadText.textContent = 'Click to select or drag and drop a photo';
-                    form.reset();
-                } else {
-                    showStatus(`Error: ${text}`, 'error');
+                // Set up timeout for fetch
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                
+                try {
+                    logDebug('Sending fetch request to /api/UploadBill');
+                    const response = await fetch('/api/UploadBill', {
+                        method: 'POST',
+                        body: formData,
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    logDebug('Response received: ' + response.status);
+                    const text = await response.text();
+                    logDebug('Response text: ' + text);
+                    
+                    if (response.ok) {
+                        showStatus(text, 'success');
+                        // Reset form and UI
+                        imagePreview.style.display = 'none';
+                        fileName.style.display = 'none';
+                        uploadText.textContent = 'Click to select a photo';
+                        form.reset();
+                    } else {
+                        showStatus(`Error: ${text}`, 'error');
+                    }
+                } catch (fetchError) {
+                    clearTimeout(timeoutId);
+                    
+                    if (fetchError.name === 'AbortError') {
+                        logDebug('Fetch request timed out');
+                        showStatus('Upload timed out. Please try again.', 'error');
+                    } else {
+                        logDebug('Fetch error: ' + fetchError.message);
+                        showStatus(`Failed to upload: ${fetchError.message}`, 'error');
+                    }
                 }
             } catch (error) {
-                showStatus(`Failed to upload: ${error.message}`, 'error');
+                logDebug('General error in submit handler: ' + error.message);
+                showStatus(`Error: ${error.message}`, 'error');
             } finally {
                 submitButton.innerHTML = 'Upload Bill';
-                submitButton.disabled = true; // Keep disabled until new file selected
+                submitButton.disabled = false; // Re-enable the button so user can try again
             }
         });
 
@@ -487,10 +656,10 @@
                 uploadStatus.className = 'status-error';
             }
             
-            // Auto-hide after 5 seconds
+            // Auto-hide after 8 seconds (longer time for error reading)
             setTimeout(() => {
                 uploadStatus.style.display = 'none';
-            }, 5000);
+            }, 8000);
             
             // Scroll to make status visible (especially on mobile)
             uploadStatus.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -499,8 +668,14 @@
         // Test for iOS Safari
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         if (isIOS) {
-            // Add special handling for iOS if needed
+            logDebug('iOS device detected');
             document.body.classList.add('ios-device');
+        }
+        
+        // Display device info for debugging
+        if (showDebug) {
+            logDebug('User agent: ' + navigator.userAgent);
+            logDebug('Platform: ' + navigator.platform);
         }
     </script>
 </body>
