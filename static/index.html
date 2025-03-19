@@ -28,13 +28,15 @@
             line-height: 1.6;
             padding: 0;
             margin: 0;
+            min-height: 100vh;
+            position: relative;
         }
 
         .container {
             width: 100%;
             max-width: 500px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 20px 20px 100px; /* Extra padding at bottom for mobile navigation bar */
         }
 
         .header {
@@ -113,6 +115,7 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
+            overflow: hidden; /* Prevent any file input overflow */
         }
 
         .file-upload:hover {
@@ -127,6 +130,7 @@
             left: 0;
             opacity: 0;
             cursor: pointer;
+            font-size: 0; /* Fix for some mobile browsers */
         }
 
         .upload-icon {
@@ -135,18 +139,34 @@
             margin-bottom: 10px;
         }
 
-        .file-preview {
-            margin-top: 20px;
-            display: none;
+        .file-preview-container {
             width: 100%;
-            max-width: 300px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .file-preview {
+            max-width: 100%;
+            max-height: 200px;
             border-radius: 6px;
+            display: none;
+            margin: 0 auto;
+            object-fit: contain;
+            border: 1px solid var(--border-color);
+        }
+
+        .file-name {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            word-break: break-all;
+            color: #666;
+            display: none;
         }
 
         .button {
             display: block;
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background-color: var(--primary-color);
             color: white;
             border: none;
@@ -155,6 +175,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: background-color 0.2s;
+            margin-top: 30px;
         }
 
         .button:hover {
@@ -203,7 +224,7 @@
         /* Mobile responsiveness */
         @media (max-width: 600px) {
             .container {
-                padding: 16px;
+                padding: 16px 16px 120px; /* Extra padding at bottom for mobile navigation */
             }
             
             .card {
@@ -215,7 +236,47 @@
             }
             
             .button {
-                padding: 12px;
+                padding: 16px;
+                margin-bottom: 24px; /* Extra margin to avoid iPhone bottom menu */
+            }
+
+            /* Fix for iOS Safari to ensure the file input is tappable */
+            .file-upload {
+                padding: 20px;
+            }
+            
+            .file-upload input[type="file"] {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                opacity: 0;
+                z-index: 100; /* Ensure it's on top */
+            }
+        }
+
+        /* iOS specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            .file-upload input[type="file"] {
+                font-size: 16px; /* Minimum font size to prevent zoom in iOS */
+                cursor: pointer;
+                opacity: 0;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+            
+            body {
+                /* Prevent momentum scrolling issues */
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .container {
+                /* Add even more bottom padding on iOS */
+                padding-bottom: 140px;
             }
         }
     </style>
@@ -261,10 +322,14 @@
                                 <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
                             </svg>
                         </div>
-                        <p>Click to select or drag and drop a photo</p>
-                        <input type="file" name="file" id="fileInput" accept="image/*" required>
+                        <p id="uploadText">Click to select or drag and drop a photo</p>
+                        <!-- Safari on iOS requires direct touch handling -->
+                        <input type="file" name="file" id="fileInput" accept="image/*" capture="environment" required>
                     </div>
-                    <img id="imagePreview" class="file-preview" alt="Preview">
+                    <div class="file-preview-container">
+                        <img id="imagePreview" class="file-preview" alt="Preview">
+                        <div id="fileName" class="file-name"></div>
+                    </div>
                 </div>
 
                 <button type="submit" id="submitButton" class="button" disabled>Upload Bill</button>
@@ -280,6 +345,8 @@
         const locationDisplay = document.getElementById('locationDisplay');
         const fileInput = document.getElementById('fileInput');
         const imagePreview = document.getElementById('imagePreview');
+        const fileName = document.getElementById('fileName');
+        const uploadText = document.getElementById('uploadText');
         const submitButton = document.getElementById('submitButton');
         const uploadStatus = document.getElementById('uploadStatus');
         const form = document.getElementById('billForm');
@@ -298,70 +365,76 @@
             document.getElementById('locationBadge').style.backgroundColor = '#ffecec';
         }
 
-        // Handle file selection
-        fileInput.addEventListener('change', function() {
-            if (this.files && this.files[0]) {
-                const file = this.files[0];
-                const reader = new FileReader();
+        // Handle file selection with iOS compatibility fixes
+        fileInput.addEventListener('change', function(event) {
+            event.preventDefault(); // Prevent default browser behavior
+            event.stopPropagation();
+            
+            handleFileSelection(this);
+        });
+
+        // Tap on the entire drop area should trigger file input
+        dropArea.addEventListener('click', function(event) {
+            // Only trigger if the click wasn't on the input itself
+            if (event.target !== fileInput) {
+                event.preventDefault();
+                fileInput.click();
+            }
+        });
+
+        function handleFileSelection(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
                 
+                // Show file name
+                fileName.textContent = file.name;
+                fileName.style.display = 'block';
+                
+                // Change upload text
+                uploadText.textContent = 'Photo selected';
+                
+                // Enable submit button immediately
+                submitButton.disabled = false;
+                
+                // Show image preview
+                const reader = new FileReader();
                 reader.onload = function(e) {
                     imagePreview.src = e.target.result;
                     imagePreview.style.display = 'block';
-                    submitButton.disabled = false;
-                }
-                
+                };
                 reader.readAsDataURL(file);
             }
-        });
+        }
 
         // Drag and drop functionality
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
+            dropArea.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
         });
 
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
         ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false);
+            dropArea.addEventListener(eventName, function() {
+                dropArea.style.backgroundColor = 'rgba(0, 120, 212, 0.05)';
+                dropArea.style.borderColor = '#0078d4';
+            }, false);
         });
 
         ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false);
+            dropArea.addEventListener(eventName, function() {
+                dropArea.style.backgroundColor = '';
+                dropArea.style.borderColor = '';
+            }, false);
         });
 
-        function highlight() {
-            dropArea.style.borderColor = var(--primary-color);
-            dropArea.style.backgroundColor = 'rgba(0, 120, 212, 0.05)';
-        }
-
-        function unhighlight() {
-            dropArea.style.borderColor = '';
-            dropArea.style.backgroundColor = '';
-        }
-
-        dropArea.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
+        dropArea.addEventListener('drop', function(e) {
             const dt = e.dataTransfer;
-            const files = dt.files;
-            fileInput.files = files;
-            
-            if (files && files[0]) {
-                const file = files[0];
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    imagePreview.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                    submitButton.disabled = false;
-                }
-                
-                reader.readAsDataURL(file);
+            if (dt.files && dt.files.length) {
+                fileInput.files = dt.files;
+                handleFileSelection(fileInput);
             }
-        }
+        }, false);
 
         // Form submission
         form.addEventListener('submit', async function(e) {
@@ -388,8 +461,10 @@
                 
                 if (response.ok) {
                     showStatus(text, 'success');
-                    // Reset form
+                    // Reset form and UI
                     imagePreview.style.display = 'none';
+                    fileName.style.display = 'none';
+                    uploadText.textContent = 'Click to select or drag and drop a photo';
                     form.reset();
                 } else {
                     showStatus(`Error: ${text}`, 'error');
@@ -398,7 +473,7 @@
                 showStatus(`Failed to upload: ${error.message}`, 'error');
             } finally {
                 submitButton.innerHTML = 'Upload Bill';
-                submitButton.disabled = false;
+                submitButton.disabled = true; // Keep disabled until new file selected
             }
         });
 
@@ -416,6 +491,16 @@
             setTimeout(() => {
                 uploadStatus.style.display = 'none';
             }, 5000);
+            
+            // Scroll to make status visible (especially on mobile)
+            uploadStatus.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Test for iOS Safari
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+            // Add special handling for iOS if needed
+            document.body.classList.add('ios-device');
         }
     </script>
 </body>
