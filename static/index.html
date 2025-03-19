@@ -2,240 +2,167 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZeroEx Bill Upload</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Bill Upload</title>
     <style>
-        :root {
-            --primary-color: #0078d4;
-            --primary-dark: #005a9e;
-            --background-color: #f9f9f9;
-            --text-color: #333;
-            --border-color: #ddd;
-            --success-color: #107c10;
-            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
-
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
+            background-color: #f5f5f5;
+            color: #333;
+            padding: 20px;
+            padding-bottom: 150px; /* Extra padding for iPhone navigation bar */
             line-height: 1.6;
-            padding: 0;
-            margin: 0;
-            min-height: 100vh;
-            position: relative;
         }
-
-        .container {
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px 20px 100px; /* Extra padding at bottom for mobile navigation bar */
-        }
-
-        .header {
-            text-align: center;
-            padding: 20px 0;
-        }
-
-        .logo {
-            max-width: 120px;
-            margin-bottom: 10px;
-        }
-
+        
         h1 {
-            font-size: 1.5rem;
-            font-weight: 500;
-            color: var(--primary-color);
-            margin-bottom: 8px;
+            color: #0078d4;
+            margin-bottom: 10px;
+            text-align: center;
         }
-
+        
         .subtitle {
-            font-size: 0.9rem;
+            text-align: center;
             color: #666;
             margin-bottom: 20px;
         }
-
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
         .card {
             background-color: white;
             border-radius: 10px;
-            padding: 24px;
-            box-shadow: var(--card-shadow);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
-
+        
         .location-badge {
-            display: inline-block;
             background-color: #f0f0f0;
-            border-radius: 16px;
-            padding: 6px 12px;
-            font-size: 0.9rem;
-            margin-bottom: 24px;
-        }
-
-        .form-group {
+            border-radius: 20px;
+            padding: 8px 15px;
             margin-bottom: 20px;
+            display: inline-block;
         }
-
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
         label {
             display: block;
-            font-size: 0.9rem;
+            margin-bottom: 5px;
             font-weight: 500;
-            margin-bottom: 8px;
         }
-
+        
         input[type="text"] {
             width: 100%;
             padding: 12px;
-            border: 1px solid var(--border-color);
+            border: 1px solid #ddd;
             border-radius: 6px;
-            font-size: 1rem;
-            transition: border 0.2s;
+            font-size: 16px;
         }
-
+        
         input[type="text"]:focus {
-            border-color: var(--primary-color);
+            border-color: #0078d4;
             outline: none;
         }
-
-        .file-upload {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 30px;
-            border: 2px dashed var(--border-color);
-            border-radius: 6px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            overflow: hidden; /* Prevent any file input overflow */
-        }
-
-        .file-upload:hover {
-            border-color: var(--primary-color);
-        }
-
-        .file-upload input[type="file"] {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            opacity: 0;
-            cursor: pointer;
-            font-size: 0; /* Fix for some mobile browsers */
-        }
-
-        .upload-icon {
-            font-size: 2rem;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-
-        .file-preview-container {
-            width: 100%;
-            margin-top: 15px;
+        
+        .photo-section {
+            margin-top: 20px;
             text-align: center;
         }
-
-        .file-preview {
-            max-width: 100%;
-            max-height: 200px;
-            border-radius: 6px;
-            display: none;
-            margin: 0 auto;
-            object-fit: contain;
-            border: 1px solid var(--border-color);
-        }
-
-        .file-name {
-            margin-top: 8px;
-            font-size: 0.9rem;
-            word-break: break-all;
-            color: #666;
-            display: none;
-        }
-
-        .photo-options {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .photo-option {
-            padding: 8px 12px;
-            background-color: #f5f5f5;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .photo-option:hover {
-            background-color: #e5e5e5;
-        }
-
-        .button {
+        
+        .btn-camera,
+        .btn-library {
             display: block;
             width: 100%;
-            padding: 16px;
-            background-color: var(--primary-color);
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .btn-camera:hover,
+        .btn-library:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .photo-preview {
+            margin-top: 15px;
+            max-width: 100%;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .file-name {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #666;
+            word-break: break-all;
+            display: none;
+        }
+        
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #0078d4;
             color: white;
             border: none;
             border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 500;
+            font-size: 16px;
+            margin-top: 20px;
             cursor: pointer;
-            transition: background-color 0.2s;
-            margin-top: 30px;
         }
-
-        .button:hover {
-            background-color: var(--primary-dark);
+        
+        .btn-submit:hover {
+            background-color: #0069bc;
         }
-
-        .button:disabled {
-            background-color: #ccc;
+        
+        .btn-submit:disabled {
+            background-color: #cccccc;
             cursor: not-allowed;
         }
-
-        #uploadStatus {
-            margin-top: 20px;
-            text-align: center;
-            padding: 12px;
-            border-radius: 6px;
-            display: none;
-        }
-
-        .status-success {
-            background-color: rgba(16, 124, 16, 0.1);
-            color: var(--success-color);
-        }
-
-        .status-error {
-            background-color: rgba(232, 17, 35, 0.1);
-            color: #e81123;
-        }
-
-        .debug-info {
-            margin-top: 20px;
+        
+        .status {
+            margin-top: 15px;
             padding: 10px;
-            background-color: #f5f5f5;
             border-radius: 6px;
-            font-size: 0.8rem;
+            text-align: center;
             display: none;
         }
-
+        
+        .status-error {
+            background-color: #fde7e9;
+            color: #d13438;
+        }
+        
+        .status-success {
+            background-color: #dff6dd;
+            color: #107c10;
+        }
+        
         .loading {
+            display: none;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        
+        .loading:after {
+            content: '';
             display: inline-block;
             width: 20px;
             height: 20px;
@@ -243,440 +170,277 @@
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-            vertical-align: middle;
         }
-
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
-        /* Mobile responsiveness */
-        @media (max-width: 600px) {
-            .container {
-                padding: 16px 16px 120px; /* Extra padding at bottom for mobile navigation */
-            }
-            
-            .card {
-                padding: 20px;
-            }
-            
-            h1 {
-                font-size: 1.3rem;
-            }
-            
-            .button {
-                padding: 16px;
-                margin-bottom: 24px; /* Extra margin to avoid iPhone bottom menu */
-            }
-
-            /* Fix for iOS Safari to ensure the file input is tappable */
-            .file-upload {
-                padding: 20px;
-            }
-            
-            .file-upload input[type="file"] {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                opacity: 0;
-                z-index: 100; /* Ensure it's on top */
-            }
+        
+        /* Hidden file inputs */
+        .hidden-input {
+            position: absolute;
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            z-index: -1;
         }
-
-        /* iOS specific fixes */
-        @supports (-webkit-touch-callout: none) {
-            .file-upload input[type="file"] {
-                font-size: 16px; /* Minimum font size to prevent zoom in iOS */
-                cursor: pointer;
-                opacity: 0;
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-            }
-            
-            body {
-                /* Prevent momentum scrolling issues */
-                -webkit-overflow-scrolling: touch;
-            }
-            
-            .container {
-                /* Add even more bottom padding on iOS */
-                padding-bottom: 140px;
-            }
+        
+        /* Debug panel (hidden by default) */
+        .debug {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Bill Upload</h1>
-            <p class="subtitle">Upload your bill photo for the field location</p>
-        </div>
-
+        <h1>Bill Upload</h1>
+        <p class="subtitle">Upload your bill photo for the field location</p>
+        
         <div class="card">
-            <div id="locationBadge" class="location-badge">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px;">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
-                </svg>
+            <div class="location-badge" id="locationBadge">
                 <span id="locationDisplay">Loading location...</span>
             </div>
-
-            <form id="billForm">
-                <input type="hidden" name="location_id" id="location_id">
+            
+            <form id="uploadForm">
+                <input type="hidden" id="locationId" name="location_id">
                 
                 <div class="form-group">
-                    <label for="truck_id">Truck ID (optional)</label>
-                    <input type="text" id="truck_id" name="truck_id" placeholder="Enter truck ID">
+                    <label for="truckId">Truck ID (optional)</label>
+                    <input type="text" id="truckId" name="truck_id" placeholder="Enter truck ID">
                 </div>
-
+                
                 <div class="form-group">
-                    <label for="bill_id">Bill ID (optional)</label>
-                    <input type="text" id="bill_id" name="bill_id" placeholder="Enter bill ID">
+                    <label for="billId">Bill ID (optional)</label>
+                    <input type="text" id="billId" name="bill_id" placeholder="Enter bill ID">
                 </div>
-
+                
                 <div class="form-group">
                     <label>Bill Photo</label>
-                    <div class="file-upload" id="dropArea">
-                        <div class="upload-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path>
-                                <line x1="16" y1="5" x2="22" y2="5"></line>
-                                <line x1="19" y1="2" x2="19" y2="8"></line>
-                                <circle cx="9" cy="9" r="2"></circle>
-                                <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
-                            </svg>
-                        </div>
-                        <p id="uploadText">Click to select a photo</p>
-                        
-                        <!-- Removed capture attribute to allow choosing from library -->
-                        <input type="file" name="file" id="fileInput" accept="image/*" required>
-                    </div>
                     
-                    <div class="photo-options">
-                        <div class="photo-option" id="takePictureBtn">Take Picture</div>
-                        <div class="photo-option" id="choosePictureBtn">Choose from Library</div>
-                    </div>
+                    <!-- Camera button -->
+                    <button type="button" class="btn-camera" id="cameraBtn">Take Photo with Camera</button>
                     
-                    <div class="file-preview-container">
-                        <img id="imagePreview" class="file-preview" alt="Preview">
-                        <div id="fileName" class="file-name"></div>
-                    </div>
+                    <!-- Library button -->
+                    <button type="button" class="btn-library" id="libraryBtn">Choose from Library</button>
+                    
+                    <!-- Hidden file inputs -->
+                    <input type="file" accept="image/*" capture="environment" id="cameraInput" class="hidden-input">
+                    <input type="file" accept="image/*" id="libraryInput" class="hidden-input">
+                    
+                    <!-- Preview image -->
+                    <img id="photoPreview" class="photo-preview" alt="Preview">
+                    <div id="fileName" class="file-name"></div>
                 </div>
-
-                <button type="submit" id="submitButton" class="button" disabled>Upload Bill</button>
+                
+                <button type="submit" id="submitBtn" class="btn-submit" disabled>
+                    Upload Bill
+                    <span id="loadingIndicator" class="loading"></span>
+                </button>
             </form>
-
-            <div id="uploadStatus"></div>
-            <div id="debugInfo" class="debug-info"></div>
+            
+            <div id="statusMessage" class="status"></div>
+            <div id="debugInfo" class="debug"></div>
         </div>
     </div>
-
+    
     <script>
-        // Get elements
-        const locationIdField = document.getElementById('location_id');
+        // Enable debug mode by setting to true
+        const DEBUG = false;
+        
+        // Elements
+        const form = document.getElementById('uploadForm');
+        const locationIdField = document.getElementById('locationId');
         const locationDisplay = document.getElementById('locationDisplay');
-        const fileInput = document.getElementById('fileInput');
-        const imagePreview = document.getElementById('imagePreview');
+        const locationBadge = document.getElementById('locationBadge');
+        const cameraBtn = document.getElementById('cameraBtn');
+        const libraryBtn = document.getElementById('libraryBtn');
+        const cameraInput = document.getElementById('cameraInput');
+        const libraryInput = document.getElementById('libraryInput');
+        const photoPreview = document.getElementById('photoPreview');
         const fileName = document.getElementById('fileName');
-        const uploadText = document.getElementById('uploadText');
-        const submitButton = document.getElementById('submitButton');
-        const uploadStatus = document.getElementById('uploadStatus');
-        const form = document.getElementById('billForm');
-        const dropArea = document.getElementById('dropArea');
-        const takePictureBtn = document.getElementById('takePictureBtn');
-        const choosePictureBtn = document.getElementById('choosePictureBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const statusMessage = document.getElementById('statusMessage');
         const debugInfo = document.getElementById('debugInfo');
         
-        // For debugging
-        const showDebug = false; // Set to true to show debug information
+        // Show debug panel if debug mode enabled
+        if (DEBUG) {
+            debugInfo.style.display = 'block';
+        }
         
+        // Log to debug panel
         function logDebug(message) {
-            if (showDebug) {
+            if (DEBUG) {
+                const timestamp = new Date().toISOString().substr(11, 8);
                 if (typeof message === 'object') {
-                    debugInfo.innerHTML += (JSON.stringify(message) + '<br>');
+                    debugInfo.textContent += `[${timestamp}] ${JSON.stringify(message)}\n`;
                 } else {
-                    debugInfo.innerHTML += (message + '<br>');
+                    debugInfo.textContent += `[${timestamp}] ${message}\n`;
                 }
-                debugInfo.style.display = 'block';
+                debugInfo.scrollTop = debugInfo.scrollHeight;
             }
         }
-
-        // Extract location_id from URL param
-        const urlParams = new URLSearchParams(window.location.search);
-        const locationId = urlParams.get('location_id') || "";
-        locationIdField.value = locationId;
         
-        // Update location display
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const locationId = urlParams.get('location_id') || '';
+        
+        // Set location ID and display
+        locationIdField.value = locationId;
         if (locationId) {
             locationDisplay.textContent = `Location ID: ${locationId}`;
         } else {
             locationDisplay.textContent = 'No location specified';
-            document.getElementById('locationBadge').style.backgroundColor = '#ffecec';
+            locationBadge.style.backgroundColor = '#fde7e9';
         }
-
-        // Handle file selection with improved error handling
-        fileInput.addEventListener('change', function(event) {
-            try {
-                logDebug('File input change event triggered');
-                handleFileSelection(this);
-            } catch (error) {
-                logDebug('Error in file input change: ' + error.message);
-                showStatus('Error selecting file: ' + error.message, 'error');
-            }
+        
+        // Variables to store the selected file
+        let selectedFile = null;
+        
+        // Camera button click
+        cameraBtn.addEventListener('click', function() {
+            logDebug('Camera button clicked');
+            cameraInput.click();
         });
-
-        // Take picture button - uses camera
-        takePictureBtn.addEventListener('click', function() {
-            try {
-                // Create a temporary input with camera capture
-                const tempInput = document.createElement('input');
-                tempInput.type = 'file';
-                tempInput.accept = 'image/*';
-                tempInput.capture = 'environment'; // Use the camera
-                
-                tempInput.addEventListener('change', function() {
-                    if (this.files && this.files.length > 0) {
-                        // Copy the file to our main input
-                        const dataTransfer = new DataTransfer();
-                        dataTransfer.items.add(this.files[0]);
-                        fileInput.files = dataTransfer.files;
-                        
-                        // Process the file
-                        handleFileSelection(fileInput);
-                    }
-                });
-                
-                tempInput.click();
-            } catch (error) {
-                logDebug('Error taking picture: ' + error.message);
-                showStatus('Error accessing camera: ' + error.message, 'error');
-            }
+        
+        // Library button click
+        libraryBtn.addEventListener('click', function() {
+            logDebug('Library button clicked');
+            libraryInput.click();
         });
-
-        // Choose from library button
-        choosePictureBtn.addEventListener('click', function() {
-            try {
-                // Create a temporary input without capture attribute
-                const tempInput = document.createElement('input');
-                tempInput.type = 'file';
-                tempInput.accept = 'image/*';
-                
-                tempInput.addEventListener('change', function() {
-                    if (this.files && this.files.length > 0) {
-                        // Copy the file to our main input
-                        const dataTransfer = new DataTransfer();
-                        dataTransfer.items.add(this.files[0]);
-                        fileInput.files = dataTransfer.files;
-                        
-                        // Process the file
-                        handleFileSelection(fileInput);
-                    }
-                });
-                
-                tempInput.click();
-            } catch (error) {
-                logDebug('Error choosing from library: ' + error.message);
-                showStatus('Error selecting file: ' + error.message, 'error');
-            }
+        
+        // Handle camera input change
+        cameraInput.addEventListener('change', function(e) {
+            handleFileSelection(this.files);
         });
-
-        // Tap on the entire drop area should trigger file input
-        dropArea.addEventListener('click', function(event) {
-            // Only trigger if the click wasn't on the input itself
-            if (event.target !== fileInput) {
-                event.preventDefault();
-                choosePictureBtn.click(); // Default to choosing from library
-            }
+        
+        // Handle library input change
+        libraryInput.addEventListener('change', function(e) {
+            handleFileSelection(this.files);
         });
-
-        function handleFileSelection(input) {
-            try {
-                logDebug('Handling file selection');
-                if (input.files && input.files[0]) {
-                    const file = input.files[0];
-                    logDebug('File selected: ' + file.name + ' (' + file.type + ')');
-                    
-                    // Show file name
-                    fileName.textContent = file.name;
-                    fileName.style.display = 'block';
-                    
-                    // Change upload text
-                    uploadText.textContent = 'Photo selected';
-                    
-                    // Enable submit button immediately
-                    submitButton.disabled = false;
-                    
-                    // Show image preview
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        logDebug('FileReader loaded');
-                        imagePreview.src = e.target.result;
-                        imagePreview.style.display = 'block';
-                    };
-                    
-                    reader.onerror = function(e) {
-                        logDebug('FileReader error: ' + e.target.error);
-                        showStatus('Error reading file: ' + e.target.error, 'error');
-                    };
-                    
-                    reader.readAsDataURL(file);
-                } else {
-                    logDebug('No file selected or files array is empty');
+        
+        // Function to handle file selection from either input
+        function handleFileSelection(files) {
+            if (files && files.length > 0) {
+                selectedFile = files[0];
+                logDebug(`File selected: ${selectedFile.name}, type: ${selectedFile.type}, size: ${selectedFile.size} bytes`);
+                
+                // Display file name
+                fileName.textContent = selectedFile.name;
+                fileName.style.display = 'block';
+                
+                // Create preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    photoPreview.src = e.target.result;
+                    photoPreview.style.display = 'block';
+                    submitBtn.disabled = false;
                 }
-            } catch (error) {
-                logDebug('Error in handleFileSelection: ' + error.message);
-                showStatus('Error processing file: ' + error.message, 'error');
+                reader.onerror = function() {
+                    logDebug('FileReader error: ' + reader.error);
+                    showStatus('Error reading file preview', 'error');
+                }
+                reader.readAsDataURL(selectedFile);
             }
         }
-
-        // Drag and drop functionality
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }, false);
-        });
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, function() {
-                dropArea.style.backgroundColor = 'rgba(0, 120, 212, 0.05)';
-                dropArea.style.borderColor = '#0078d4';
-            }, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, function() {
-                dropArea.style.backgroundColor = '';
-                dropArea.style.borderColor = '';
-            }, false);
-        });
-
-        dropArea.addEventListener('drop', function(e) {
-            try {
-                const dt = e.dataTransfer;
-                if (dt.files && dt.files.length) {
-                    // Create a proper FileList
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(dt.files[0]);
-                    fileInput.files = dataTransfer.files;
-                    
-                    handleFileSelection(fileInput);
-                }
-            } catch (error) {
-                logDebug('Error in drop handler: ' + error.message);
-                showStatus('Error uploading dropped file: ' + error.message, 'error');
-            }
-        }, false);
-
-        // Form submission with improved error handling and timeout
+        
+        // Show status message
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = type === 'error' ? 'status status-error' : 'status status-success';
+            statusMessage.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Form submission
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            if (!fileInput.files || fileInput.files.length === 0) {
+            if (!selectedFile) {
                 showStatus('Please select a bill photo', 'error');
                 return;
             }
             
             // Show loading state
-            submitButton.innerHTML = '<span class="loading"></span> Uploading...';
-            submitButton.disabled = true;
+            submitBtn.disabled = true;
+            loadingIndicator.style.display = 'inline-block';
             
             try {
-                logDebug('Starting form submission');
-                const formData = new FormData(form);
+                logDebug('Creating FormData');
+                const formData = new FormData();
                 
-                // Log form data keys
-                const formDataKeys = [];
-                for (const key of formData.keys()) {
-                    formDataKeys.push(key);
-                }
-                logDebug('Form data keys: ' + formDataKeys.join(', '));
+                // Add form fields
+                formData.append('location_id', locationIdField.value);
+                formData.append('truck_id', document.getElementById('truckId').value || '');
+                formData.append('bill_id', document.getElementById('billId').value || '');
+                formData.append('file', selectedFile);
                 
-                // Set up timeout for fetch
+                logDebug('Sending form data to /api/UploadBill');
+                
+                // Set up fetch with timeout
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                const timeout = setTimeout(() => controller.abort(), 30000);
                 
-                try {
-                    logDebug('Sending fetch request to /api/UploadBill');
-                    const response = await fetch('/api/UploadBill', {
-                        method: 'POST',
-                        body: formData,
-                        signal: controller.signal
-                    });
+                const response = await fetch('/api/UploadBill', {
+                    method: 'POST',
+                    body: formData,
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeout);
+                
+                logDebug(`Response status: ${response.status}`);
+                const text = await response.text();
+                logDebug(`Response text: ${text}`);
+                
+                if (response.ok) {
+                    // Success
+                    showStatus(text, 'success');
                     
-                    clearTimeout(timeoutId);
+                    // Reset form
+                    photoPreview.style.display = 'none';
+                    fileName.style.display = 'none';
+                    selectedFile = null;
+                    form.reset();
                     
-                    logDebug('Response received: ' + response.status);
-                    const text = await response.text();
-                    logDebug('Response text: ' + text);
-                    
-                    if (response.ok) {
-                        showStatus(text, 'success');
-                        // Reset form and UI
-                        imagePreview.style.display = 'none';
-                        fileName.style.display = 'none';
-                        uploadText.textContent = 'Click to select a photo';
-                        form.reset();
-                    } else {
-                        showStatus(`Error: ${text}`, 'error');
-                    }
-                } catch (fetchError) {
-                    clearTimeout(timeoutId);
-                    
-                    if (fetchError.name === 'AbortError') {
-                        logDebug('Fetch request timed out');
-                        showStatus('Upload timed out. Please try again.', 'error');
-                    } else {
-                        logDebug('Fetch error: ' + fetchError.message);
-                        showStatus(`Failed to upload: ${fetchError.message}`, 'error');
-                    }
+                    // Reset location ID from URL
+                    locationIdField.value = locationId;
+                } else {
+                    // Error
+                    showStatus(`Error: ${text}`, 'error');
                 }
             } catch (error) {
-                logDebug('General error in submit handler: ' + error.message);
-                showStatus(`Error: ${error.message}`, 'error');
+                logDebug(`Error during upload: ${error.message}`);
+                
+                if (error.name === 'AbortError') {
+                    showStatus('Upload timed out after 30 seconds', 'error');
+                } else {
+                    showStatus(`Upload failed: ${error.message}`, 'error');
+                }
             } finally {
-                submitButton.innerHTML = 'Upload Bill';
-                submitButton.disabled = false; // Re-enable the button so user can try again
+                // Reset UI
+                submitBtn.disabled = false;
+                loadingIndicator.style.display = 'none';
             }
         });
-
-        function showStatus(message, type) {
-            uploadStatus.textContent = message;
-            uploadStatus.style.display = 'block';
-            
-            if (type === 'success') {
-                uploadStatus.className = 'status-success';
-            } else {
-                uploadStatus.className = 'status-error';
-            }
-            
-            // Auto-hide after 8 seconds (longer time for error reading)
-            setTimeout(() => {
-                uploadStatus.style.display = 'none';
-            }, 8000);
-            
-            // Scroll to make status visible (especially on mobile)
-            uploadStatus.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-
-        // Test for iOS Safari
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        if (isIOS) {
-            logDebug('iOS device detected');
-            document.body.classList.add('ios-device');
-        }
         
-        // Display device info for debugging
-        if (showDebug) {
-            logDebug('User agent: ' + navigator.userAgent);
-            logDebug('Platform: ' + navigator.platform);
-        }
+        // Log device info
+        logDebug(`User Agent: ${navigator.userAgent}`);
+        logDebug(`Platform: ${navigator.platform}`);
+        logDebug(`Viewport: ${window.innerWidth}x${window.innerHeight}`);
     </script>
 </body>
 </html>
