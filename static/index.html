@@ -1,48 +1,422 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZeroEx Bill Upload</title>
+    <style>
+        :root {
+            --primary-color: #0078d4;
+            --primary-dark: #005a9e;
+            --background-color: #f9f9f9;
+            --text-color: #333;
+            --border-color: #ddd;
+            --success-color: #107c10;
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            max-width: 120px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+        }
+
+        .location-badge {
+            display: inline-block;
+            background-color: #f0f0f0;
+            border-radius: 16px;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .file-upload {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            border: 2px dashed var(--border-color);
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary-color);
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .file-preview {
+            margin-top: 20px;
+            display: none;
+            width: 100%;
+            max-width: 300px;
+            border-radius: 6px;
+        }
+
+        .button {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #uploadStatus {
+            margin-top: 20px;
+            text-align: center;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .status-success {
+            background-color: rgba(16, 124, 16, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-error {
+            background-color: rgba(232, 17, 35, 0.1);
+            color: #e81123;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .button {
+                padding: 12px;
+            }
+        }
+    </style>
 </head>
 <body>
-<h2>Bill Upload (Updated Version)</h2>
+    <div class="container">
+        <div class="header">
+            <h1>Bill Upload</h1>
+            <p class="subtitle">Upload your bill photo for the field location</p>
+        </div>
 
-<form id="billForm">
-    <!-- We'll auto-fill location ID from URL param -->
-    <input type="hidden" name="location_id" id="location_id">
-    
-    Truck ID (optional):<br>
-    <input type="text" name="truck_id"><br><br>
+        <div class="card">
+            <div id="locationBadge" class="location-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px;">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span id="locationDisplay">Loading location...</span>
+            </div>
 
-    Bill ID (optional):<br>
-    <input type="text" name="bill_id"><br><br>
+            <form id="billForm">
+                <input type="hidden" name="location_id" id="location_id">
+                
+                <div class="form-group">
+                    <label for="truck_id">Truck ID (optional)</label>
+                    <input type="text" id="truck_id" name="truck_id" placeholder="Enter truck ID">
+                </div>
 
-    Bill Photo:<br>
-    <input type="file" name="file" accept="image/*" required><br><br>
-    
-    <button type="submit">Upload</button>
-</form>
+                <div class="form-group">
+                    <label for="bill_id">Bill ID (optional)</label>
+                    <input type="text" id="bill_id" name="bill_id" placeholder="Enter bill ID">
+                </div>
 
-<script>
-// 1) Extract location_id from URL param, e.g. ?location_id=12345
-const urlParams = new URLSearchParams(window.location.search);
-document.getElementById('location_id').value = urlParams.get('location_id') || "";
+                <div class="form-group">
+                    <label>Bill Photo</label>
+                    <div class="file-upload" id="dropArea">
+                        <div class="upload-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path>
+                                <line x1="16" y1="5" x2="22" y2="5"></line>
+                                <line x1="19" y1="2" x2="19" y2="8"></line>
+                                <circle cx="9" cy="9" r="2"></circle>
+                                <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
+                            </svg>
+                        </div>
+                        <p>Click to select or drag and drop a photo</p>
+                        <input type="file" name="file" id="fileInput" accept="image/*" required>
+                    </div>
+                    <img id="imagePreview" class="file-preview" alt="Preview">
+                </div>
 
-// 2) On form submit, we POST to the Azure Function endpoint
-document.getElementById('billForm').onsubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
+                <button type="submit" id="submitButton" class="button" disabled>Upload Bill</button>
+            </form>
 
-    // The Azure Function in Static Web Apps is accessible via "/api/<FunctionName>"
-    // Our function is named "UploadBill" (from the folder name).
-    const res = await fetch('/api/UploadBill', {
-        method: 'POST',
-        body: formData
-    });
+            <div id="uploadStatus"></div>
+        </div>
+    </div>
 
-    const text = await res.text();
-    alert(text);
-};
-</script>
+    <script>
+        // Get elements
+        const locationIdField = document.getElementById('location_id');
+        const locationDisplay = document.getElementById('locationDisplay');
+        const fileInput = document.getElementById('fileInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const submitButton = document.getElementById('submitButton');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const form = document.getElementById('billForm');
+        const dropArea = document.getElementById('dropArea');
 
+        // Extract location_id from URL param
+        const urlParams = new URLSearchParams(window.location.search);
+        const locationId = urlParams.get('location_id') || "";
+        locationIdField.value = locationId;
+        
+        // Update location display
+        if (locationId) {
+            locationDisplay.textContent = `Location ID: ${locationId}`;
+        } else {
+            locationDisplay.textContent = 'No location specified';
+            document.getElementById('locationBadge').style.backgroundColor = '#ffecec';
+        }
+
+        // Handle file selection
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    submitButton.disabled = false;
+                }
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.style.borderColor = var(--primary-color);
+            dropArea.style.backgroundColor = 'rgba(0, 120, 212, 0.05)';
+        }
+
+        function unhighlight() {
+            dropArea.style.borderColor = '';
+            dropArea.style.backgroundColor = '';
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            
+            if (files && files[0]) {
+                const file = files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    submitButton.disabled = false;
+                }
+                
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Form submission
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showStatus('Please select a bill photo', 'error');
+                return;
+            }
+            
+            // Show loading state
+            submitButton.innerHTML = '<span class="loading"></span> Uploading...';
+            submitButton.disabled = true;
+            
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/api/UploadBill', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const text = await response.text();
+                
+                if (response.ok) {
+                    showStatus(text, 'success');
+                    // Reset form
+                    imagePreview.style.display = 'none';
+                    form.reset();
+                } else {
+                    showStatus(`Error: ${text}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Failed to upload: ${error.message}`, 'error');
+            } finally {
+                submitButton.innerHTML = 'Upload Bill';
+                submitButton.disabled = false;
+            }
+        });
+
+        function showStatus(message, type) {
+            uploadStatus.textContent = message;
+            uploadStatus.style.display = 'block';
+            
+            if (type === 'success') {
+                uploadStatus.className = 'status-success';
+            } else {
+                uploadStatus.className = 'status-error';
+            }
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                uploadStatus.style.display = 'none';
+            }, 5000);
+        }
+    </script>
 </body>
 </html>
